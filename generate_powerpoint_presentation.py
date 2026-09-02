@@ -1,6 +1,6 @@
 """
 generate_powerpoint_presentation.py – Generates an expanded 10-slide, highly professional,
-visually appealing widescreen PowerPoint presentation (.pptx) embedding visual diagrams.
+visually appealing widescreen PowerPoint presentation (.pptx) with native vector shapes, clear diagrams, and clean layout.
 """
 import os
 import sys
@@ -174,24 +174,50 @@ def build_presentation(filename="ECommerce_Agentic_AI_Presentation.pptx"):
     )
 
     # ═════════════════════════════════════════════════════════════════
-    # SLIDE 3: MEDALLION PIPELINE ARCHITECTURE (WITH DIAGRAM)
+    # SLIDE 3: MEDALLION PIPELINE ARCHITECTURE (NATIVE CRISP CARDS)
     # ═════════════════════════════════════════════════════════════════
     slide3 = prs.slides.add_slide(blank_layout)
     apply_slide_background(slide3)
     add_header(slide3, "2. Data Engineering: Medallion Architecture", "Refining raw incoming data into pure, analytics-ready Star Schema tables.")
 
-    # Embed visual diagram image if available
-    if os.path.exists("medallion_diagram.png"):
-        slide3.shapes.add_picture("medallion_diagram.png", Inches(0.8), Inches(1.5), width=Inches(11.733))
+    # 4 Native Process Cards across the top
+    blocks_info = [
+        ("1. RAW SOURCES", "CSV, JSON, APIs\nOrders, Customers,\nSellers & Products", RGBColor(71, 85, 105), C_PRIMARY),
+        ("2. BRONZE LAYER", "Raw Storage 🟫\nAppend-Only Ingestion\nBatch Run Auditing", RGBColor(217, 119, 6), C_PRIMARY),
+        ("3. SILVER LAYER", "Cleaned & Standard 🥈\nISO Dates, Currency Cast\nSCD Type 2 History", RGBColor(71, 85, 105), C_PRIMARY),
+        ("4. GOLD LAYER", "Star Schema 🥇\nFact & Dimension Tables\nRevenue Marts", RGBColor(234, 179, 8), C_PRIMARY),
+    ]
 
-    # Text summary below diagram
+    card_w = Inches(2.6)
+    card_h = Inches(2.2)
+    start_x = Inches(0.8)
+    gap = Inches(0.44)
+
+    for idx, (title, body, bcolor, tcolor) in enumerate(blocks_info):
+        left_pos = start_x + idx * (card_w + gap)
+        add_card(
+            slide3, left_pos, Inches(1.6), card_w, card_h,
+            title=title, body=body, bg_color=C_CARD_BG, border_color=bcolor, title_color=bcolor
+        )
+        # Arrow between cards
+        if idx < 3:
+            arrow_box = slide3.shapes.add_textbox(left_pos + card_w, Inches(2.4), gap, Inches(0.6))
+            p_a = arrow_box.text_frame.paragraphs[0]
+            p_a.text = "➔"
+            p_a.alignment = PP_ALIGN.CENTER
+            p_a.font.name = "Arial"
+            p_a.font.size = Pt(20)
+            p_a.font.bold = True
+            p_a.font.color.rgb = C_ACCENT
+
+    # Detailed Summary Card below
     add_card(
-        slide3, Inches(0.8), Inches(4.5), Inches(11.733), Inches(2.3),
-        title="MEDALLION PIPELINE BREAKDOWN",
+        slide3, Inches(0.8), Inches(4.2), Inches(11.733), Inches(2.6),
+        title="MEDALLION PIPELINE BREAKDOWN & RESPONSIBILITIES",
         body=(
-            "• Bronze Layer (🟫 Raw): Append-only storage for original customer order feeds. Preserves raw state with batch IDs and timestamps.\n"
-            "• Silver Layer (🥈 Cleansed): Standardizes date formats, cleans currencies, removes duplicates, translates categories to English, and tracks SCD Type 2.\n"
-            "• Gold Layer (🥇 Analytics Star Schema): Optimized dimensional star schema (fact_sales, dim_customer, dim_product, dim_seller, dim_date, revenue_mart)."
+            "• Bronze Layer (🟫 Raw Feeds): Stores raw incoming customer and seller transaction feeds without modification. Tracks ingestion batch IDs & load timestamps.\n\n"
+            "• Silver Layer (🥈 Cleaned & Standardized): Fixes invalid date formats, converts currency strings into NUMERIC types, eliminates duplicate rows, translates category names into English, and maintains historical SCD Type 2 tracking for customer/seller locations.\n\n"
+            "• Gold Layer (🥇 Analytics Star Schema): Fully optimized dimensional Star Schema (gold.fact_sales, gold.dim_customer, gold.dim_product, gold.dim_seller, gold.dim_date, gold.revenue_mart) designed for instant OLAP business queries."
         ),
         title_color=C_ACCENT
     )
@@ -243,7 +269,6 @@ def build_presentation(filename="ECommerce_Agentic_AI_Presentation.pptx"):
     apply_slide_background(slide5)
     add_header(slide5, "4. Data Science & ML Engine", "Regression trends, moving averages, Z-score anomaly detection, and linear forecasting.")
 
-    # Left: Explanation card
     add_card(
         slide5, Inches(0.8), Inches(1.6), Inches(5.4), Inches(5.2),
         title="🧠 STATISTICAL & ML CAPABILITIES",
@@ -260,7 +285,6 @@ def build_presentation(filename="ECommerce_Agentic_AI_Presentation.pptx"):
         title_color=C_ACCENT
     )
 
-    # Right: Embedded chart
     if os.path.exists("forecast_chart.png"):
         slide5.shapes.add_picture("forecast_chart.png", Inches(6.4), Inches(1.6), width=Inches(6.1))
 
@@ -315,24 +339,49 @@ def build_presentation(filename="ECommerce_Agentic_AI_Presentation.pptx"):
             p.font.color.rgb = C_PRIMARY
 
     # ═════════════════════════════════════════════════════════════════
-    # SLIDE 7: AGENT PIPELINE FLOW (WITH FLOWCHART DIAGRAM)
+    # SLIDE 7: MULTI-AGENT ORCHESTRATION FLOW (NATIVE CRISP FLOW)
     # ═════════════════════════════════════════════════════════════════
     slide7 = prs.slides.add_slide(blank_layout)
     apply_slide_background(slide7)
     add_header(slide7, "6. Multi-Agent Orchestration Flow", "Autonomous intent classification, sequential agent chaining, and context forwarding.")
 
-    # Embed agent flow diagram if available
-    if os.path.exists("agent_flow_diagram.png"):
-        slide7.shapes.add_picture("agent_flow_diagram.png", Inches(0.8), Inches(1.5), width=Inches(11.733))
+    # 5 Process boxes across top
+    flow_boxes = [
+        ("1. USER QUESTION", "Asks: 'Why did profit drop?'", RGBColor(2, 132, 199)),
+        ("2. AUTO ROUTER 🤖", "Routes to Data+Insight+Action", C_ACCENT),
+        ("3. DATA AGENT 📊", "Executes safe Gold SQL", C_SUCCESS),
+        ("4. INSIGHT AGENT 💡", "Explains 12% category drop", C_WARNING),
+        ("5. ACTION AGENT 🎯", "Recommends promo bundles", RGBColor(219, 39, 119)),
+    ]
 
-    # Summary card below
+    fb_w = Inches(2.0)
+    fb_h = Inches(2.2)
+    fb_start = Inches(0.8)
+    fb_gap = Inches(0.43)
+
+    for idx, (title, body, bcolor) in enumerate(flow_boxes):
+        left_pos = fb_start + idx * (fb_w + fb_gap)
+        add_card(
+            slide7, left_pos, Inches(1.6), fb_w, fb_h,
+            title=title, body=body, bg_color=C_CARD_BG, border_color=bcolor, title_color=bcolor
+        )
+        if idx < 4:
+            arrow_box = slide7.shapes.add_textbox(left_pos + fb_w, Inches(2.4), fb_gap, Inches(0.6))
+            p_a = arrow_box.text_frame.paragraphs[0]
+            p_a.text = "➔"
+            p_a.alignment = PP_ALIGN.CENTER
+            p_a.font.name = "Arial"
+            p_a.font.size = Pt(18)
+            p_a.font.bold = True
+            p_a.font.color.rgb = C_ACCENT
+
     add_card(
-        slide7, Inches(0.8), Inches(4.5), Inches(11.733), Inches(2.3),
-        title="HOW AGENTS CHAIN TOGETHER",
+        slide7, Inches(0.8), Inches(4.2), Inches(11.733), Inches(2.6),
+        title="HOW CONTEXT FORWARDING WORKS BETWEEN AGENTS",
         body=(
-            "1. User Question → Auto Router analyzes intent and selects agent sequence (e.g. ['data', 'insight', 'action']).\n"
-            "2. Data Agent executes safe SQL against Gold schema → Passes query results as context to Insight Agent.\n"
-            "3. Insight Agent derives evidence-backed business insights → Passes insight as context to Action Agent.\n"
+            "1. User Question → Auto Router analyzes intent and selects agent sequence (e.g. ['data', 'insight', 'action']).\n\n"
+            "2. Data Agent executes safe SQL against Gold schema → Passes query results as context to Insight Agent.\n\n"
+            "3. Insight Agent derives evidence-backed business insights → Passes insight as context to Action Agent.\n\n"
             "4. Action Agent formulates specific management recommendations → Streamlit UI renders formatted response cards."
         ),
         title_color=C_ACCENT
@@ -445,7 +494,7 @@ def build_presentation(filename="ECommerce_Agentic_AI_Presentation.pptx"):
     )
 
     prs.save(filename)
-    print(f"Expanded 10-slide PowerPoint presentation successfully saved: {filename}")
+    print(f"PowerPoint presentation successfully saved: {filename}")
 
 if __name__ == "__main__":
     build_presentation()
