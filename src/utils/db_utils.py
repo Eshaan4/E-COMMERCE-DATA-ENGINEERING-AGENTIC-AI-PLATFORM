@@ -18,6 +18,14 @@ logger = get_logger("db_utils")
 def get_connection_string() -> str:
     """Build PostgreSQL connection string from environment variables."""
     host     = os.getenv("POSTGRES_HOST",     "localhost")
+    # If POSTGRES_HOST is 'postgres' (docker service name) but running locally outside docker, fallback to localhost
+    if host == "postgres":
+        import socket
+        try:
+            socket.gethostbyname(host)
+        except socket.gaierror:
+            host = "localhost"
+
     port     = os.getenv("POSTGRES_PORT",     "5432")
     db       = os.getenv("POSTGRES_DB",       "de_poc")
     user     = os.getenv("POSTGRES_USER",     "de_user")
@@ -34,7 +42,7 @@ def get_engine(pool_size: int = 5) -> Engine:
         max_overflow=10,
         pool_pre_ping=True,
         echo=False,
-        future=False,   # SQLAlchemy 1.4 legacy mode
+        future=True,   # SQLAlchemy 2.0 mode
     )
     logger.debug("Engine created for: %s", conn_str.replace(
         os.getenv("POSTGRES_PASSWORD", "de_password123"), "***"

@@ -261,6 +261,7 @@ def print_summary(engine) -> None:
 # ─────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     start    = datetime.now()
+    # Create a single unified batch ID for the entire run
     batch_id = generate_batch_id("FULL_PIPELINE")
 
     print("\n" + "═" * 65)
@@ -271,20 +272,35 @@ if __name__ == "__main__":
 
     engine = get_engine()
 
-    b = run_bronze(engine, batch_id)
+    from src.metadata.metadata_tracker import PipelineRun
+
+    # Reuse the single batch_id by overriding it on the context managers
+    with PipelineRun("bronze_ingestion", layer="bronze", triggered_by="manual") as r_b:
+        r_b.batch_id = batch_id
+        b = run_bronze(engine, batch_id)
+        r_b.records_inserted = b
+
     time.sleep(1)
 
-    s = run_silver(engine, batch_id)
+    with PipelineRun("silver_transformation", layer="silver", triggered_by="manual") as r_s:
+        r_s.batch_id = batch_id
+        s = run_silver(engine, batch_id)
+        r_s.records_inserted = s
+
     time.sleep(1)
 
-    g = run_gold(engine)
+    with PipelineRun("gold_aggregation", layer="gold", triggered_by="manual") as r_g:
+        r_g.batch_id = batch_id
+        g = run_gold(engine)
+        r_g.records_inserted = g
 
+    # Summary Report
     print_summary(engine)
 
-    elapsed = (datetime.now() - start).total_seconds()
-    print(f"\n{'═' * 65}")
-    print(f"  ✔  Pipeline complete in {elapsed:.1f}s")
+    secs = (datetime.now() - start).total_seconds()
+    print("\n" + "═" * 65)
+    print(f"  ✔  Pipeline complete in {secs:.1f}s")
     print(f"     Bronze rows : {b:,}")
     print(f"     Silver rows : {s:,}")
     print(f"     Gold rows   : {g:,}")
-    print(f"{'═' * 65}\n")
+    print("═" * 65 + "\n")

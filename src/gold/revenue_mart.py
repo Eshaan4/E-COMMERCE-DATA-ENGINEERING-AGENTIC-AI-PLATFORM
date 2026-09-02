@@ -46,9 +46,9 @@ def build_revenue_mart(engine=None) -> int:
         logger.warning("No data for revenue mart")
         return 0
 
-    df["total_revenue"]    = df["total_revenue"].round(2)
-    df["total_freight"]    = df["total_freight"].round(2)
-    df["avg_order_value"]  = df["avg_order_value"].round(2)
+    df["total_revenue"]    = pd.to_numeric(df["total_revenue"], errors="coerce").fillna(0.0).round(2)
+    df["total_freight"]    = pd.to_numeric(df["total_freight"], errors="coerce").fillna(0.0).round(2)
+    df["avg_order_value"]  = pd.to_numeric(df["avg_order_value"], errors="coerce").fillna(0.0).round(2)
 
     # ── Window Functions (in pandas) ──────────────────────────
 
